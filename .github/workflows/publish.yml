@@ -1,0 +1,60 @@
+name: Build and push on Docker hub
+run-name: "Build and push on Docker hub: ${{ inputs.version }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release (ex: 1.2.3)"
+        required: true
+        type: string
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    env:
+      IMAGE_NAME: resticprofile-app
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 🔥 Create git tag
+      - name: Create tag
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+          git tag ${{ inputs.version }}
+          git push origin ${{ inputs.version }}
+
+      - name: Set version env
+        run: echo "VERSION=${{ inputs.version }}" >> $GITHUB_ENV
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }} \
+            .
+
+      - name: Push Docker image
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
+
+      - name: Tag as latest
+        run: |
+          docker tag \
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }} \
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+
+      - name: Push latest tag
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
