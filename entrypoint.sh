@@ -1,10 +1,10 @@
 #!/bin/sh
 set -e
 
-CONFIG_FILE=${CONFIG_FILE:-/resticprofile/profiles.yaml}
+RESTICPROFILE_CONFIG =${RESTICPROFILE_CONFIG :-/resticprofile/profiles.yml}
 
 echo "[entrypoint] Registering schedules..."
-resticprofile -c "$CONFIG_FILE" schedule --all
+resticprofile -c "$RESTICPROFILE_CONFIG " schedule --all
 
 echo "[entrypoint] Starting supercronic..."
 exec supercronic /resticprofile/crontab
