@@ -1,4 +1,4 @@
-# resticprofile official image already includes restic, rclone and supercronic
+# resticprofile official image already includes restic, rclone and crond
 FROM creativeprojects/resticprofile:latest
 
 # Switch to root to install additional packages
