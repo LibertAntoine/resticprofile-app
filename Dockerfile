@@ -5,7 +5,7 @@ FROM creativeprojects/resticprofile:latest
 USER root
 
 # Add postgresql-client for pg_dump
-RUN apk add --no-cache postgresql-client
+RUN apk add --no-cache postgresql-client sqlite
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
